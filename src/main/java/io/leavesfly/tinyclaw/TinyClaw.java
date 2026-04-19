@@ -22,21 +22,21 @@ import java.util.function.Supplier;
  * - skills: 技能插件管理
  * 
  * 使用示例：
- * java -jar tinyclaw.jar version        # 查看版本信息
- * java -jar tinyclaw.jar                # 查看帮助信息
- * java -jar tinyclaw.jar agent list     # 执行特定命令
+ * java -jar tinyclaw.jar version # 查看版本信息
+ * java -jar tinyclaw.jar # 查看帮助信息
+ * java -jar tinyclaw.jar agent list # 执行特定命令
  */
 public class TinyClaw {
-    
+
     /** 当前软件版本号 */
     public static final String VERSION = "0.1.0";
-    
+
     /** 应用程序 Logo 符号 */
     public static final String LOGO = "🦞";
-    
+
     /** 命令注册表，存储所有可用命令及其创建工厂 */
     private static final Map<String, Supplier<CliCommand>> COMMAND_REGISTRY;
-    
+
     // 初始化命令注册表，注册所有支持的命令
     static {
         COMMAND_REGISTRY = new LinkedHashMap<>();
@@ -49,10 +49,11 @@ public class TinyClaw {
         COMMAND_REGISTRY.put("mcp", McpCommand::new);
         COMMAND_REGISTRY.put("demo", DemoCommand::new);
     }
-    
+
     /**
      * 注册命令
-     * @param name 命令名称
+     * 
+     * @param name     命令名称
      * @param supplier 命令工厂
      */
     public static void registerCommand(String name, Supplier<CliCommand> supplier) {
@@ -75,6 +76,10 @@ public class TinyClaw {
      * @param args 命令行参数，第一个参数为命令名称，后续参数为命令的子参数
      */
     public static void main(String[] args) {
+        // 如果没有参数，自动使用 gateway 命令
+        if (args.length == 0) {
+            args = new String[] { "gateway" };
+        }
         System.exit(run(args));
     }
 
@@ -89,19 +94,19 @@ public class TinyClaw {
             printHelp();
             return 1;
         }
-        
+
         String command = args[0];
-        
+
         try {
             // 优先检查是否为版本查询命令
             if (isVersionCommand(command)) {
                 System.out.println(LOGO + " tinyclaw v" + VERSION);
                 return 0;
             }
-            
+
             // 提取子命令参数（去掉第一个命令名称）
             String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
-            
+
             // 从注册表中获取对应的命令处理器
             Supplier<CliCommand> commandSupplier = COMMAND_REGISTRY.get(command);
             if (commandSupplier != null) {
@@ -119,7 +124,7 @@ public class TinyClaw {
             return 1;
         }
     }
-    
+
     /**
      * 判断给定的命令字符串是否为版本查询命令
      * 
@@ -131,7 +136,7 @@ public class TinyClaw {
     private static boolean isVersionCommand(String command) {
         return "version".equals(command) || "--version".equals(command) || "-v".equals(command);
     }
-    
+
     /**
      * 打印帮助信息
      * 
@@ -144,13 +149,13 @@ public class TinyClaw {
         System.out.println("Usage: tinyclaw <command>");
         System.out.println();
         System.out.println("Commands:");
-        
+
         // 遍历命令注册表，打印所有可用命令及其描述
         for (Map.Entry<String, Supplier<CliCommand>> entry : COMMAND_REGISTRY.entrySet()) {
             CliCommand cmd = entry.getValue().get();
             System.out.println("  " + String.format("%-11s", entry.getKey()) + cmd.description());
         }
-        
+
         // 添加版本命令的帮助信息
         System.out.println("  version     显示版本信息");
     }
